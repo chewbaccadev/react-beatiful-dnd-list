@@ -3,7 +3,7 @@ import AccountCircle from '@/public/AccountCircle.png';
 import Add from '@/public/Add.png';
 import DragIndicator from '@/public/DragIndicator.png';
 import Image from 'next/image';
-import { useState } from 'react';
+import { CSSProperties, useState } from 'react';
 import {
   DragDropContext,
   Draggable,
@@ -54,7 +54,7 @@ const Home = () => {
   const getItemStyle = (
     isDragging: boolean,
     draggableStyle: DraggingStyle | NotDraggingStyle | undefined
-  ) => ({
+  ): CSSProperties => ({
     // some basic styles to make the items look a bit nicer
     userSelect: 'none',
     padding: grid * 2,
