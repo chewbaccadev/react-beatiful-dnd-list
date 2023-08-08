@@ -1,6 +1,6 @@
 {
   "name": "react-beatiful-dnd-list",
-  "version": "0.1.0",
+  "version": "1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,7 +16,11 @@
     "eslint-config-next": "13.4.13",
     "next": "13.4.13",
     "react": "18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "18.2.0",
     "typescript": "5.1.6"
+  },
+  "devDependencies": {
+    "@types/react-beautiful-dnd": "^13.1.4"
   }
 }

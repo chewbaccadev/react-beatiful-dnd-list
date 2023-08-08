@@ -1,95 +1,158 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client';
+import AccountCircle from '@/public/AccountCircle.png';
+import Add from '@/public/Add.png';
+import DragIndicator from '@/public/DragIndicator.png';
+import Image from 'next/image';
+import { useState } from 'react';
+import {
+  DragDropContext,
+  Draggable,
+  DraggingStyle,
+  Droppable,
+  NotDraggingStyle,
+  OnDragEndResponder,
+} from 'react-beautiful-dnd';
+import styles from './page.module.css';
 
-export default function Home() {
+const Home = () => {
+  const getItems = (count: number) =>
+    Array.from({ length: count }, (v, k) => k).map((k) => ({
+      id: `Item-${k + 1}`,
+      content: `Item ${k + 1}`,
+    }));
+
+  const grid = 8;
+  const [items, setItems] = useState<
+    {
+      id: string;
+      content: string;
+    }[]
+  >(() => getItems(5));
+
+  // a little function to help us with reordering the result
+  const reorder = (
+    list: {
+      id: string;
+      content: string;
+    }[],
+    startIndex: number,
+    endIndex: number
+  ) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    return result;
+  };
+
+  const getListStyle = (isDraggingOver: boolean) => ({
+    background: isDraggingOver ? 'rgb(200, 200, 200, 0.1)' : 'transparent',
+    padding: grid,
+    width: 'min(calc(100vw - 10rem), 30rem)',
+  });
+
+  const getItemStyle = (
+    isDragging: boolean,
+    draggableStyle: DraggingStyle | NotDraggingStyle | undefined
+  ) => ({
+    // some basic styles to make the items look a bit nicer
+    userSelect: 'none',
+    padding: grid * 2,
+    margin: `0 0 ${grid}px 0`,
+    width: '100%',
+    borderRadius: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+
+    // change background colour if dragging
+    // background: isDragging ? 'lightgreen' : 'grey',
+    background: 'lightgrey',
+
+    // styles we need to apply on draggables
+    ...draggableStyle,
+  });
+
+  const onDragEnd: OnDragEndResponder = (result) => {
+    // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
+
+    setItems((prev) =>
+      reorder(prev, result.source.index, result!.destination!.index)
+    );
+  };
+
+  const onAddItem = () => {
+    setItems((prev) => [
+      ...prev,
+      {
+        id: `Item-${prev.length + 1}`,
+        content: `Item ${prev.length + 1}`,
+      },
+    ]);
+  };
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
+      <div className={styles.title}>
+        <h1>Drag to reorder:</h1>
         <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+          src={Add.src}
+          alt='Add icon'
+          width={Add.width}
+          height={Add.height}
+          title='Add Item'
+          onClick={onAddItem}
         />
       </div>
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId='droppable'>
+          {(provided, snapshot) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              style={getListStyle(snapshot.isDraggingOver)}
+            >
+              {items.map((item, index) => (
+                <Draggable key={item.id} draggableId={item.id} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      style={getItemStyle(
+                        snapshot.isDragging,
+                        provided.draggableProps.style
+                      )}
+                    >
+                      <Image
+                        src={DragIndicator.src}
+                        alt='Drag indicator icon'
+                        width={DragIndicator.width}
+                        height={DragIndicator.height}
+                        style={{ width: 32, height: 32 }}
+                      />
+                      <Image
+                        src={AccountCircle.src}
+                        alt='Account circle icon'
+                        width={AccountCircle.width}
+                        height={AccountCircle.height}
+                        style={{ width: 44, height: 44, marginRight: '2rem' }}
+                      />
+                      <p style={{ fontSize: '1.2rem' }}>{item.content}</p>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </main>
-  )
-}
+  );
+};
+
+export default Home;
