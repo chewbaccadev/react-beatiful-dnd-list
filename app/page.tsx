@@ -1,7 +1,8 @@
 'use client';
+import DragIndicator from '@/public/DragIndicator.png';
 import AccountCircle from '@/public/AccountCircle.png';
 import Add from '@/public/Add.png';
-import DragIndicator from '@/public/DragIndicator.png';
+import Delete from '@/public/Delete.png'
 import Image from 'next/image';
 import { CSSProperties, useState } from 'react';
 import {
@@ -93,18 +94,25 @@ const Home = () => {
     ]);
   };
 
+  const onDeleteItem = (id: string) => {
+    setItems((prev) => {
+      const indexToBeRemoved = prev.findIndex(item => item.id === id);
+      prev.splice(indexToBeRemoved, 0);
+      return prev;
+    })
+  }
+
   return (
     <main className={styles.main}>
       <div className={styles.title}>
         <h1>Drag to reorder:</h1>
-        <Image
-          src={Add.src}
-          alt='Add icon'
-          width={Add.width}
-          height={Add.height}
-          title='Add Item'
-          onClick={onAddItem}
-        />
+        <button className={styles.button} onClick={onAddItem} role='button'>
+          <Image
+            src={Add.src}
+            alt='Add icon'
+            title='Add item'
+          />
+        </button>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -130,18 +138,21 @@ const Home = () => {
                       <Image
                         src={DragIndicator.src}
                         alt='Drag indicator icon'
-                        width={DragIndicator.width}
-                        height={DragIndicator.height}
                         style={{ width: 32, height: 32 }}
                       />
                       <Image
                         src={AccountCircle.src}
                         alt='Account circle icon'
-                        width={AccountCircle.width}
-                        height={AccountCircle.height}
                         style={{ width: 44, height: 44, marginRight: '2rem' }}
                       />
                       <p style={{ fontSize: '1.2rem' }}>{item.content}</p>
+                      <button className={styles.button} onClick={onDeleteItem.bind(null, item.id)} role='button'>
+                        <Image
+                          src={Delete.src}
+                          alt='Delete button'
+                          title='Delete item'
+                        />
+                      </button>
                     </div>
                   )}
                 </Draggable>
