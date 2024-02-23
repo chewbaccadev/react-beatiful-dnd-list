@@ -2,7 +2,7 @@
   display: grid;
   place-content: center;
   min-height: 100vh;
-  padding: 5rem;
+  padding: 1rem;
 }
 
 .title {
@@ -16,9 +16,24 @@
   cursor: pointer;
 }
 
+.listItemContentWrapper {
+  display: flex;
+  align-items: center;
+}
+
 .button {
+  display: grid;
+  place-items: center;
   width: 3rem;
   height: 3rem;
   border: none;
   outline: none;
+}
+
+.addButton {
+  background-color: transparent;
+}
+
+.deleteButton {
+  border-radius: 50%;
 }

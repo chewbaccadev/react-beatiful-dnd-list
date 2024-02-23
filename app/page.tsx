@@ -2,7 +2,7 @@
 import DragIndicator from '@/public/DragIndicator.png';
 import AccountCircle from '@/public/AccountCircle.png';
 import Add from '@/public/Add.png';
-import Delete from '@/public/Delete.png'
+import Delete from '@/public/Delete.png';
 import Image from 'next/image';
 import { CSSProperties, useState } from 'react';
 import {
@@ -18,14 +18,14 @@ import styles from './page.module.css';
 const Home = () => {
   const getItems = (count: number) =>
     Array.from({ length: count }, (v, k) => k).map((k) => ({
-      id: `Item-${k + 1}`,
+      id: k + 1,
       content: `Item ${k + 1}`,
     }));
 
   const grid = 8;
   const [items, setItems] = useState<
     {
-      id: string;
+      id: number;
       content: string;
     }[]
   >(() => getItems(5));
@@ -33,7 +33,7 @@ const Home = () => {
   // a little function to help us with reordering the result
   const reorder = (
     list: {
-      id: string;
+      id: number;
       content: string;
     }[],
     startIndex: number,
@@ -49,7 +49,6 @@ const Home = () => {
   const getListStyle = (isDraggingOver: boolean) => ({
     background: isDraggingOver ? 'rgb(200, 200, 200, 0.1)' : 'transparent',
     padding: grid,
-    width: 'min(calc(100vw - 10rem), 30rem)',
   });
 
   const getItemStyle = (
@@ -64,6 +63,7 @@ const Home = () => {
     borderRadius: '1rem',
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'space-between',
 
     // change background colour if dragging
     // background: isDragging ? 'lightgreen' : 'grey',
@@ -85,30 +85,49 @@ const Home = () => {
   };
 
   const onAddItem = () => {
-    setItems((prev) => [
-      ...prev,
-      {
-        id: `Item-${prev.length + 1}`,
-        content: `Item ${prev.length + 1}`,
-      },
-    ]);
+    setItems((prev) => {
+      console.log(prev);
+      if (prev.length === 0) {
+        return [{ id: 1, content: 'Item 1' }];
+      }
+      // Always add a bigger id than what is in the list
+      const idArr = prev.map((item) => item.id);
+      const largestId = Math.max(...idArr);
+
+      return [
+        ...prev,
+        {
+          id: largestId + 1,
+          content: `Item ${largestId + 1}`,
+        },
+      ];
+    });
   };
 
-  const onDeleteItem = (id: string) => {
-    setItems((prev) => {
-      const indexToBeRemoved = prev.findIndex(item => item.id === id);
-      prev.splice(indexToBeRemoved, 0);
-      return prev;
-    })
-  }
+  const onDeleteItem = (id: number) => {
+    const indexToBeRemoved = items.findIndex((item) => item.id === id);
+
+    // Won't work if you splice on the items arr directly (ask Atlassian why that is)
+    const newItems = [...items];
+
+    newItems.splice(indexToBeRemoved, 1);
+
+    setItems(newItems);
+  };
 
   return (
     <main className={styles.main}>
       <div className={styles.title}>
         <h1>Drag to reorder:</h1>
-        <button className={styles.button} onClick={onAddItem} role='button'>
+        <button
+          className={`${styles.button} ${styles.addButton}`}
+          onClick={onAddItem}
+          type='button'
+        >
           <Image
             src={Add.src}
+            width={Add.width}
+            height={Add.height}
             alt='Add icon'
             title='Add item'
           />
@@ -124,7 +143,11 @@ const Home = () => {
               style={getListStyle(snapshot.isDraggingOver)}
             >
               {items.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
+                <Draggable
+                  key={item.id}
+                  draggableId={`${item.id}`}
+                  index={index}
+                >
                   {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
@@ -135,20 +158,33 @@ const Home = () => {
                         provided.draggableProps.style
                       )}
                     >
-                      <Image
-                        src={DragIndicator.src}
-                        alt='Drag indicator icon'
-                        style={{ width: 32, height: 32 }}
-                      />
-                      <Image
-                        src={AccountCircle.src}
-                        alt='Account circle icon'
-                        style={{ width: 44, height: 44, marginRight: '2rem' }}
-                      />
-                      <p style={{ fontSize: '1.2rem' }}>{item.content}</p>
-                      <button className={styles.button} onClick={onDeleteItem.bind(null, item.id)} role='button'>
+                      <div className={styles.listItemContentWrapper}>
+                        <Image
+                          src={DragIndicator.src}
+                          width={DragIndicator.width}
+                          height={DragIndicator.height}
+                          alt='Drag indicator icon'
+                          style={{ width: 32, height: 32 }}
+                        />
+                        <Image
+                          src={AccountCircle.src}
+                          width={AccountCircle.width}
+                          height={AccountCircle.height}
+                          alt='Account circle icon'
+                          style={{ width: 44, height: 44, marginRight: '2rem' }}
+                        />
+                        <p style={{ fontSize: '1.2rem' }}>{item.content}</p>
+                      </div>
+
+                      <button
+                        className={`${styles.button} ${styles.deleteButton}`}
+                        onClick={onDeleteItem.bind(null, item.id)}
+                        type='button'
+                      >
                         <Image
                           src={Delete.src}
+                          width={Delete.width}
+                          height={Delete.height}
                           alt='Delete button'
                           title='Delete item'
                         />
